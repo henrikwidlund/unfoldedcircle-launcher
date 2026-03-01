@@ -42,6 +42,8 @@ jobs:
           
           dotnet publish ./src/UnfoldedCircle.Launcher/UnfoldedCircle.Launcher.csproj -r linux-arm64 -c Release -o ./publish -p:Version="$ASSEMBLY_VERSION"
           
+          mkdir ./publish/certs && mkdir ./publish/openssl
+          
           # Bundle CA certificates from the system
           if [ -d "/etc/ssl/certs" ]; then
             # Copy all .pem files from system certificate directory
