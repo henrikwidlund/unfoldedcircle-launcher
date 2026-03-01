@@ -1,0 +1,88 @@
+name: GitHub Release
+
+on:
+  release:
+    types: [ published ]
+  workflow_dispatch:
+
+jobs:
+  release:
+    name: Release native binaries
+    permissions:
+      id-token: write
+      attestations: write
+      artifact-metadata: write
+      contents: write
+    runs-on: ubuntu-24.04-arm
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+
+      - name: Setup dotnet
+        uses: actions/setup-dotnet@v5
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Update ca-certificates (Linux ARM64)
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y ca-certificates
+
+      - name: Build
+        shell: bash
+        run: |
+          tag=$(git describe --tags --abbrev=0)
+          date=$(date -u +"%Y-%m-%d")
+          ASSEMBLY_VERSION="${tag//v}"
+          
+          # Build everything
+          release_name="unfolded-circle-launcher-${tag}-linux-arm64"
+          
+          dotnet publish ./src/UnfoldedCircle.Launcher/UnfoldedCircle.Launcher.csproj -r linux-arm64 -c Release -o ./publish -p:Version="$ASSEMBLY_VERSION"
+          
+          # Bundle CA certificates from the system
+          if [ -d "/etc/ssl/certs" ]; then
+            # Copy all .pem files from system certificate directory
+            cp /etc/ssl/certs/*.pem ./publish/certs/ 2>/dev/null || true
+            # Copy the ca-certificates.crt file if it exists
+            [ -f "/etc/ssl/certs/ca-certificates.crt" ] && cp /etc/ssl/certs/ca-certificates.crt ./publish/certs/ || true
+          fi
+            
+          # Bundle OpenSSL shared libraries
+          if command -v ldconfig >/dev/null 2>&1; then
+            openssl_lib=$(ldconfig -p | awk '/libssl\.so/{print $NF; exit}')
+            if [ -n "$openssl_lib" ]; then
+              openssl_dir=$(dirname "$openssl_lib")
+              cp "$openssl_dir"/libssl.so* ./publish/openssl/ 2>/dev/null || true
+              cp "$openssl_dir"/libcrypto.so* ./publish/openssl/ 2>/dev/null || true
+            fi
+          fi
+
+          # Prevent modification except by root
+          chmod 755 ./publish/certs
+          chmod 644 ./publish/certs/*
+          if [ -d "./publish/openssl" ]; then
+            chmod 755 ./publish/openssl
+            chmod 644 ./publish/openssl/*
+          fi
+
+          tar -czvf unfolded-circle-launcher-${tag}-remote.tar.gz -C ./driverdir .
+          
+          # Delete output directory
+          rm -r "./publish"
+
+      - name: Publish
+        uses: softprops/action-gh-release@a06a81a03ee405af7f2048a818ed3f03bbf83c7b
+        with:
+          files: |
+            unfolded-circle-launcher*.tar.gz
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Attest build provenance
+        uses: actions/attest@v4.1.0
+        with:
+          subject-path: |
+            unfolded-circle-launcher*.tar.gz

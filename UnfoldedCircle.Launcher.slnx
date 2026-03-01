@@ -1,0 +1,8 @@
+<Solution>
+  <Folder Name="/gh-actions/">
+    <File Path=".github\workflows\ci.yml" />
+    <File Path=".github\workflows\dependency-review.yml" />
+    <File Path=".github\workflows\github-release.yml" />
+  </Folder>
+  <Project Path="src/UnfoldedCircle.Launcher/UnfoldedCircle.Launcher.csproj" />
+</Solution>
