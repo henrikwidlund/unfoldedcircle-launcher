@@ -25,11 +25,6 @@ jobs:
         with:
           dotnet-version: 10.0.x
 
-      - name: Update ca-certificates (Linux ARM64)
-        run: |
-          sudo apt-get update
-          sudo apt-get install -y ca-certificates
-
       - name: Build
         shell: bash
         run: |
@@ -70,7 +65,7 @@ jobs:
             chmod 644 ./publish/openssl/*
           fi
 
-          tar -czvf unfolded-circle-launcher-${tag}-remote.tar.gz -C ./driverdir .
+          tar -czvf unfolded-circle-launcher-${tag}-remote.tar.gz -C ./publish .
           
           # Delete output directory
           rm -r "./publish"
