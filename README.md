@@ -4,7 +4,7 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/henrikwidlund/unfoldedcircle-launcher/ci.yml?label=CI&logo=github)](https://github.com/henrikwidlund/unfoldedcircle-launcher/actions/workflows/ci.yml)
 
 This repository contains the code for a launcher application that can start other processes on the Unfolded Circle Remotes.
-The main goal of this application is to include OpenSSL and ca-certificates automatically and add the necessary configuration
+The main goal of this application is to ca-certificates automatically and add the necessary configuration
 to let applications that have dependencies on those work without relying on the underlying operating system to make them available in the sandbox.
 
 ### Usage
