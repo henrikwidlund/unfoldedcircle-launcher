@@ -2,15 +2,6 @@
 
 var appDir = AppContext.BaseDirectory;
 
-// Set up OpenSSL library path - this will be inherited by the spawned process
-var opensslPath = Path.Combine(appDir, "openssl");
-if (Directory.Exists(opensslPath))
-{
-    var currentLd = Environment.GetEnvironmentVariable("LD_LIBRARY_PATH") ?? "";
-    var newLd = string.IsNullOrEmpty(currentLd) ? opensslPath : $"{opensslPath}:{currentLd}";
-    Environment.SetEnvironmentVariable("LD_LIBRARY_PATH", newLd);
-}
-
 // Set up certificate paths for OpenSSL
 var certFile = Path.Combine(appDir, "certs", "ca-certificates.crt");
 var certDir = Path.Combine(appDir, "certs");

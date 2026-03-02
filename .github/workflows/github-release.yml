@@ -37,7 +37,7 @@ jobs:
           
           dotnet publish ./src/UnfoldedCircle.Launcher/UnfoldedCircle.Launcher.csproj -r linux-arm64 -c Release -o ./publish -p:Version="$ASSEMBLY_VERSION"
           
-          mkdir ./publish/certs && mkdir ./publish/openssl
+          mkdir ./publish/certs
           
           # Bundle CA certificates from the system
           if [ -d "/etc/ssl/certs" ]; then
@@ -46,24 +46,10 @@ jobs:
             # Copy the ca-certificates.crt file if it exists
             [ -f "/etc/ssl/certs/ca-certificates.crt" ] && cp /etc/ssl/certs/ca-certificates.crt ./publish/certs/ || true
           fi
-            
-          # Bundle OpenSSL shared libraries
-          if command -v ldconfig >/dev/null 2>&1; then
-            openssl_lib=$(ldconfig -p | awk '/libssl\.so/{print $NF; exit}')
-            if [ -n "$openssl_lib" ]; then
-              openssl_dir=$(dirname "$openssl_lib")
-              cp "$openssl_dir"/libssl.so* ./publish/openssl/ 2>/dev/null || true
-              cp "$openssl_dir"/libcrypto.so* ./publish/openssl/ 2>/dev/null || true
-            fi
-          fi
 
           # Prevent modification except by root
           chmod 755 ./publish/certs
           chmod 644 ./publish/certs/*
-          if [ -d "./publish/openssl" ]; then
-            chmod 755 ./publish/openssl
-            chmod 644 ./publish/openssl/*
-          fi
 
           tar -czvf unfolded-circle-launcher-${tag}-remote.tar.gz -C ./publish .
           
