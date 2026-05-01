@@ -1,3 +1,5 @@
+### Archived - Workaround no longer needed as integrations running on remotes have access to ca-certificates
+
 # Unfolded Circle Launcher
 
 [![Release](https://img.shields.io/github/actions/workflow/status/henrikwidlund/unfoldedcircle-launcher/github-release.yml?label=Release&logo=github)](https://github.com/henrikwidlund/unfoldedcircle-launcher/actions/workflows/github-release.yml)
